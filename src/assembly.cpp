@@ -1,3 +1,4 @@
+#include <iomanip>
 #include "assembly.hpp"
 
 #define HERE std::cout << "here: " << __LINE__ << std::endl
