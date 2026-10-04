@@ -1,4 +1,5 @@
 #include "assembly.hpp"
+#include <iomanip>
 
 #define HERE std::cout << "here: " << __LINE__ << std::endl
 
@@ -632,22 +633,19 @@ Compiler::expression(const std::shared_ptr<Node::GenericExpr> &call)
     }
     else if (std::holds_alternative<Node::Identifier>(*call->expr)) {
         auto identifier = std::get<Node::Identifier>(*call->expr);
-        std::optional<Storage> storage = makeStorage(identifier.type);
+        // Identifier nodes carry VARIABLE_ID, not the declared numeric type.
+        const auto &allocation = identifiers_.at(identifier.token.value);
+        const bool is_unsigned =
+        unsigned_registers_.find(allocation.first) != unsigned_registers_.end();
+        const auto &types = REVERSE_TYPE_ASM.at(allocation.second);
+        curr_expr_type = is_unsigned ? types.second : types.first;
+        std::optional<Storage> storage = makeStorage(curr_expr_type);
         Expression id_ptr(identifier.token.value,
                           identifiers_.at(identifier.token.value).second,
                           identifiers_.at(identifier.token.value).first, storage);
 
         // %4 = load i32, ptr %2, align
         std::string type_asm = identifiers_.at(identifier.token.value).second;
-
-        if (storage.value() != Storage::UNSIGNED) {
-            curr_expr_type =
-            REVERSE_TYPE_ASM.at(identifiers_.at(identifier.token.value).second).first;
-        }
-        else {
-            curr_expr_type =
-            REVERSE_TYPE_ASM.at(identifiers_.at(identifier.token.value).second).second;
-        }
 
         std::string alignment = STRING_TYPE_ALIGN.at(type_asm);
         std::string register_num = "%" + std::to_string(num_registers_++);
