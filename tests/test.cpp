@@ -240,6 +240,24 @@ bool TEST_COMPILE()
         // parse.debugASTPrinter(*ast);
 
         auto assembly = Compiler(std::move(ast), out_filename);
+        // Reading a variable must recover its declared type, not VARIABLE_ID.
+        auto reads_source = RatSource("data/identifier_reads.rat");
+        auto reads_lexer = Lexer(reads_source);
+        while (reads_lexer.advanceToken()) {
+        }
+        auto reads_tokens = reads_lexer.getTokens();
+        auto reads_parser = Parser(reads_tokens, reads_source);
+        auto reads_ast = reads_parser.dispatch();
+        {
+            auto reads_compiler = Compiler(reads_ast, "data/identifier_reads.ll");
+        }
+        std::ifstream generated("data/identifier_reads.ll");
+        std::stringstream contents;
+        contents << generated.rdbuf();
+        if (!generated || contents.str().find("%d") == std::string::npos ||
+            contents.str().find("%u") == std::string::npos) {
+            throw std::runtime_error("identifier signedness was not preserved in IR");
+        }
     }
     catch (const std::exception &e) {
         std::cerr << e.what() << std::endl;

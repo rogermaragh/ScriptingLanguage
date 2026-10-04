@@ -1,18 +1,21 @@
-all:
-	@$(MAKE) -C ./build
+BUILD_DIR ?= build
+CMAKE ?= cmake
+CLANG ?= clang
+CMAKE_FLAGS ?= -DCMAKE_BUILD_TYPE=Debug
 
-rat:
-	@$(MAKE) -C ./build
-	@./build/rat
+.PHONY: all rat clean compile
+
+all:
+	@$(CMAKE) -S . -B "$(BUILD_DIR)" $(CMAKE_FLAGS)
+	@$(CMAKE) --build "$(BUILD_DIR)"
+
+rat: all
+	@cd "$(BUILD_DIR)" && ./rat
 
 clean:
-	@rm -rf ./build > /dev/null 2>&1
-	@mkdir ./build
-	@cd ./build && cmake .. > /dev/null 2>&1
+	@$(CMAKE) --build "$(BUILD_DIR)" --target clean
 
-compile:
-	@$(MAKE) -C ./build
-	@./build/rat
-	@clang data/compile.ll -o build/compile
-	@./build/compile
+compile: rat
+	@$(CLANG) "$(BUILD_DIR)/data/compile.ll" -o "$(BUILD_DIR)/compile"
+	@"$(BUILD_DIR)/compile"
 

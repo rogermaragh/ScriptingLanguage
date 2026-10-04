@@ -1,0 +1,7 @@
+fn_ main() {
+    let signed_value: int = 10
+    let unsigned_value: uint = 20u
+    println(signed_value)
+    println(unsigned_value)
+    rev
+}

@@ -1,5 +1,34 @@
 # Rat Programming Language
 
+## Build and run the existing checks
+
+Use CMake 3.15 or newer and a compiler supporting C++20. The current executable
+runs eight lexer/parser/compiler/semantic test groups; it is not a complete
+language command-line interface.
+
+```sh
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+cmake --build build
+cd build
+ctest --output-on-failure
+```
+
+On Windows, run these commands in a Visual Studio Native Tools prompt and add
+`-G "NMake Makefiles"` to the configure command. For multi-configuration generators,
+select the configuration with `cmake --build build --config Debug` and
+`ctest -C Debug --output-on-failure`.
+
+CMake honors the selected compiler and build configuration. The source uses
+C++20; it does not require C++23. Assertions remain enabled for this test executable
+in Release too. Enable AddressSanitizer on GCC/Clang with
+`-DRAT_ENABLE_ASAN=ON`.
+
+On systems with GNU Make and a single-configuration CMake generator, `make rat`
+configures, builds and runs the checks from the build directory. `make compile`
+additionally uses Clang to compile the generated `build/data/compile.ll` and runs
+the result. Set `BUILD_DIR`, `CMAKE`, `CMAKE_FLAGS` or `CLANG` to override those defaults.
+CTest supplies the copied data directory; generated IR stays in the build tree.
+
 ![Logo](https://i.imgur.com/X0G455X.jpeg)
 
 ## Introduction
